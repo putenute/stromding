@@ -1,38 +1,63 @@
-// The "Square Detector" program.
-// It loads several images sequentially and tries to find squares in
-// each image
+//
+
+
 
 #include "opencv2/core/core.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/highgui/highgui.hpp"
 
+
 #include <iostream>
 #include <math.h>
 #include <string.h>
 
+
 using namespace cv;
 using namespace std;
 
-void help()
+
+
+//================================================
+// Settings, Constants and members
+int thresh = 3, N = 1;
+static const char* filename =  "img/sample1.jpg";
+vector<vector<Point> > screenRectangles;
+//================================================
+
+
+
+//Main method
+int main(int /*argc*/, char** /*argv*/)
 {
-	cout <<
-	"\nA program using pyramid scaling, Canny, contours, contour simpification and\n"
-	"memory storage (it's got it all folks) to find\n"
-	"squares in a list of images pic1-6.png\n"
-	"Returns sequence of squares detected on the image.\n"
-	"the sequence is stored in the specified memory storage\n"
-	"Call:\n"
-	"./squares\n"
-    "Using OpenCV version %s\n" << CV_VERSION << "\n" << endl;
+	
+    
+	//Load input file 
+	
+	
+    Mat image = imread(filename, 1);
+    if( image.empty() )
+    {
+		cout << "Couldn't load " << filename << endl;
+        return 1;
+    }
+    
+	//Find LCD screen
+    findScreenRectangle(image, screenRectangles);
+	
+	//DEBUG: show found ScreenRectangle
+	drawScreenRectangle(image, screenRectangles);
+
+	//TODO Recognize digits in lcd screen using pattern matching
+	//SEE LI_THESIS.pdf
+
+    return 0;
 }
 
 
-int thresh = 3, N = 1;
-const char* wndname = "Square Detection Demo";
 
-// helper function:
-// finds a cosine of angle between vectors
-// from pt0->pt1 and from pt0->pt2
+
+
+// helper function: finds a cosine of angle between vectors from pt0->pt1 and from pt0->pt2
 double angle( Point pt1, Point pt2, Point pt0 )
 {
     double dx1 = pt1.x - pt0.x;
@@ -42,9 +67,10 @@ double angle( Point pt1, Point pt2, Point pt0 )
     return (dx1*dx2 + dy1*dy2)/sqrt((dx1*dx1 + dy1*dy1)*(dx2*dx2 + dy2*dy2) + 1e-10);
 }
 
-// returns sequence of squares detected on the image.
-// the sequence is stored in the specified memory storage
-void findSquares( const Mat& image, vector<vector<Point> >& squares )
+
+
+// Find the squares (rectangles)  which includes the LCD screen with digits
+void findScreenRectangle( const Mat& image, vector<vector<Point> >& squares )
 {
     squares.clear();
     int numsquares = 0;
@@ -119,63 +145,53 @@ void findSquares( const Mat& image, vector<vector<Point> >& squares )
                     // vertices to resultant sequence
                     if( maxCosine < 0.3 ){
                         squares.push_back(approx);
-			numsquares++;
-			Point ul=approx[0];
-			Point ur=approx[0];
-			Point ll=approx[0];
-			Point lr=approx[0];
-			cout << "\n Found  square " << numsquares << ":";
-			for( int i = 0; i < 4; i++ ){
-				Point p = approx[i];
-				if(p.x <= ul.x && p.y >= ul.y) ul = p;
-				if(p.x >= ur.x && p.y >= ur.y) ur=p;
-				if(p.x <= ll.x && p.y <= ll.y) ll=p;
-				if(p.x >= lr.x && p.y <= lr.y) lr=p;
-			//	cout << "(" << approx[i].x<<","<< approx[i].y<< "), ";	
-			}
-			cout << "ul("<<ul.x<<","<<ul.y<<"),"<<"ur("<<ur.x<<","<<ur.y<<"),"<<"ll("<<ll.x<<","<<ll.y<<"),"<<"lr("<<lr.x<<","<<lr.y<<"). ";
-			cout << endl;
-				
-		    }
-                }
+						numsquares++;
+						Point ul=approx[0];
+						Point ur=approx[0];
+						Point ll=approx[0];
+						Point lr=approx[0];
+						cout << "\n Found  square " << numsquares << ":";
+						
+						//Find boundary points of rectangles
+						for( int i = 0; i < 4; i++ )
+						{
+							Point p = approx[i];
+							if(p.x <= ul.x && p.y >= ul.y) ul=p;
+							if(p.x >= ur.x && p.y >= ur.y) ur=p;
+							if(p.x <= ll.x && p.y <= ll.y) ll=p;
+							if(p.x >= lr.x && p.y <= lr.y) lr=p;
+						}
+						cout 
+						<< "ul("<<ul.x<<","<<ul.y<<"),"
+						<<"ur("<<ur.x<<","<<ur.y<<"),"
+						<<"ll("<<ll.x<<","<<ll.y<<"),"
+						<<"lr("<<lr.x<<","<<lr.y<<"). ";
+						cout << endl;
+					}
+				}
             }
         }
     }
 }
 
 
-// the function draws all the squares in the image
-void drawSquares( Mat& image, const vector<vector<Point> >& squares )
+// the function draws all the rectangles in the image
+void drawScreenRectangle( Mat& image, const vector<vector<Point> >& rectangles )
 {
-    for( size_t i = 0; i < squares.size(); i++ )
+	//Set up Window 
+	namedWindow( "stromding", 1 );
+
+	//Draw rectangles
+    for( size_t i = 0; i < rectangles.size(); i++ )
     {
-        const Point* p = &squares[i][0];
-        int n = (int)squares[i].size();
+        const Point* p = &rectangles[i][0];
+        int n = (int)rectangles[i].size();
         polylines(image, &p, &n, 1, true, Scalar(0,255,0), 3, CV_AA);
     }
 
-    imshow(wndname, image);
+	//Show window
+    imshow("stromding", image);
+	int c = waitKey();
 }
 
 
-int main(int /*argc*/, char** /*argv*/)
-{
-    static const char* filename =  "img/sample1.jpg";
-    help();
-    namedWindow( wndname, 1 );
-    vector<vector<Point> > squares;
-    
-        Mat image = imread(filename, 1);
-        if( image.empty() )
-        {
-            cout << "Couldn't load " << filename << endl;
-            return 1;
-        }
-        
-        findSquares(image, squares);
-        drawSquares(image, squares);
-
-        int c = waitKey();
-
-    return 0;
-}
