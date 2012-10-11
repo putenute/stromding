@@ -26,34 +26,6 @@ vector<vector<Point> > screenRectangles;
 
 
 
-//Main method
-int main(int /*argc*/, char** /*argv*/)
-{
-	
-    
-	//Load input file 
-	
-	
-    Mat image = imread(filename, 1);
-    if( image.empty() )
-    {
-		cout << "Couldn't load " << filename << endl;
-        return 1;
-    }
-    
-	//Find LCD screen
-    findScreenRectangle(image, screenRectangles);
-	
-	//DEBUG: show found ScreenRectangle
-	drawScreenRectangle(image, screenRectangles);
-
-	//TODO Recognize digits in lcd screen using pattern matching
-	//SEE LI_THESIS.pdf
-
-    return 0;
-}
-
-
 
 
 
@@ -193,5 +165,34 @@ void drawScreenRectangle( Mat& image, const vector<vector<Point> >& rectangles )
     imshow("stromding", image);
 	int c = waitKey();
 }
+
+//Main method
+int main(int /*argc*/, char** /*argv*/)
+{
+	
+    
+	//Load input file 
+	
+	
+    Mat image = imread(filename, 1);
+    if( image.empty() )
+    {
+		cout << "Couldn't load " << filename << endl;
+        return 1;
+    }
+    
+	//Find LCD screen
+    findScreenRectangle(image, screenRectangles);
+	
+	//DEBUG: show found ScreenRectangle
+	drawScreenRectangle(image, screenRectangles);
+
+	//TODO Recognize digits in lcd screen using pattern matching
+	//SEE LI_THESIS.pdf
+
+    return 0;
+}
+
+
 
 

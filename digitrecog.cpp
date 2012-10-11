@@ -9,10 +9,10 @@ using namespace std;
 
 const int train_samples = 1;
 const int classes = 10;
-const int sizex = 20;
-const int sizey = 30;
+const int sizex = 145;
+const int sizey = 226;
 const int ImageSize = sizex * sizey;
-char pathToImages[] = "../images";
+char pathToImages[] = "img";
 
 void PreProcessImage(Mat *inImage,Mat *outImage,int sizex, int sizey);
 void LearnFromImages(CvMat* trainData, CvMat* trainClasses);
@@ -32,7 +32,7 @@ int main(int argc, char** argv)
 
  KNearest knearest(trainData, trainClasses);
 
- RunSelfTest(knearest);
+ //RunSelfTest(knearest);
 
  cout << "losgehts\n";
 
@@ -111,7 +111,7 @@ void RunSelfTest(KNearest& knn2)
  {
   int iSecret = rand() % 10;
   //cout << iSecret;
-  sprintf(file, "%s/%d.png", pathToImages, iSecret);
+  sprintf(file, "%s/%d.jpg", pathToImages, iSecret);
   img = imread(file, 1);
   Mat stagedImage;
   PreProcessImage(&img, &stagedImage, sizex, sizey);
@@ -141,20 +141,26 @@ void AnalyseImage(KNearest knearest)
  Mat image, gray, blur, thresh;
 
  vector < vector<Point> > contours;
- image = imread("../images/buchstaben.png", 1);
-
+ image = imread("img/digitraw.jpg", 1);
  cvtColor(image, gray, COLOR_BGR2GRAY);
- GaussianBlur(gray, blur, Size(5, 5), 2, 2);
- adaptiveThreshold(blur, thresh, 255, 1, 1, 11, 2);
- findContours(thresh, contours, RETR_LIST, CHAIN_APPROX_SIMPLE);
+ 
+  GaussianBlur(gray, blur, Size(5, 5), 2, 2);
+  adaptiveThreshold(blur, thresh, 128, ADAPTIVE_THRESH_MEAN_C, THRESH_BINARY, 3, 0);
+ //threshold(blur, thresh, 10, 120,THRESH_BINARY_INV);
+
+  findContours(thresh, contours, RETR_LIST, CHAIN_APPROX_SIMPLE);
+    
+	imshow("single", blur);
+	imshow("all", thresh);
+    waitKey(0);
 
  for (size_t i = 0; i < contours.size(); i++)
  {
   vector < Point > cnt = contours[i];
-  if (contourArea(cnt) > 50)
+  if (contourArea(cnt) > 200)
   {
    Rect rec = boundingRect(cnt);
-   if (rec.height > 28)
+   if (rec.height > 110 && rec.height < 300)
    {
     Mat roi = image(rec);
     Mat stagedImage;
