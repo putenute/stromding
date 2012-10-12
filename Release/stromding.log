@@ -1,0 +1,17 @@
+﻿Build started 12.10.2012 15:37:39.
+     1>Project "C:\Users\admin\Documents\stromding\stromding.vcxproj" on node 2 (build target(s)).
+     1>InitializeBuildStatus:
+         Creating "Release\stromding.unsuccessfulbuild" because "AlwaysCreate" was specified.
+       ClCompile:
+         All outputs are up-to-date.
+       Link:
+         All outputs are up-to-date.
+         stromding.vcxproj -> C:\Users\admin\Documents\stromding\Release\stromding.exe
+       FinalizeBuildStatus:
+         Deleting file "Release\stromding.unsuccessfulbuild".
+         Touching "Release\stromding.lastbuildstate".
+     1>Done Building Project "C:\Users\admin\Documents\stromding\stromding.vcxproj" (build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:00.18
